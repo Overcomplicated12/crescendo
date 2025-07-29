@@ -6,7 +6,9 @@ import static org.frc6423.robot.subsystems.intake.IntakeConstants.PIVOT_CAN_BUS;
 import static org.frc6423.robot.subsystems.intake.IntakeConstants.PIVOT_CAN_ID;
 import static org.frc6423.robot.subsystems.intake.IntakeConstants.ROLLER_CAN_BUS;
 import static org.frc6423.robot.subsystems.intake.IntakeConstants.ROLLER_CAN_ID;
+import static org.frc6423.robot.subsystems.intake.IntakeConstants.pivotFeedbackCfg;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionTorqueCurrentFOC;
 import com.ctre.phoenix6.controls.VelocityTorqueCurrentFOC;
@@ -33,6 +35,10 @@ public class IntakeHardwareReal extends IntakeHardware {
     private final VoltageOut voltReq = new VoltageOut(0.0);
     private final VelocityTorqueCurrentFOC velReq = new VelocityTorqueCurrentFOC(0.0);
 
+    private final BaseStatusSignal pivotPose = pivot.getPosition();
+    
+
+
     public IntakeHardwareReal(){
         pivotConf.Audio.BeepOnBoot = true;
         pivotConf.Audio.BeepOnConfig = true;
@@ -51,6 +57,8 @@ public class IntakeHardwareReal extends IntakeHardware {
 
         pivotConf.Feedback.FeedbackRemoteSensorID = PIVOT_ABS_ENCODER_CAN_ID;
         pivotConf.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.FusedCANcoder;
+
+        pivotConf.Slot0 = pivotFeedbackCfg;
 
         pivot.getConfigurator().apply(pivotConf);
 
@@ -76,6 +84,14 @@ public class IntakeHardwareReal extends IntakeHardware {
 
 
     @Override
+    public void updateSignals() {
+        BaseStatusSignal.refreshAll(pivotPose);
+        pivotAngleRevs = pivotPose.getValueAsDouble();
+        
+        
+    }
+
+    @Override
     public boolean noteDetected() {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'noteDetected'");
@@ -83,8 +99,8 @@ public class IntakeHardwareReal extends IntakeHardware {
 
     @Override
     public Rotation2d getPivotAngle() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getPivotAngle'");
+        BaseStatusSignal.refreshAll(pivotPose);
+        return Rotation2d.fromRotations(pivotAngleRevs);
     }
 
     @Override

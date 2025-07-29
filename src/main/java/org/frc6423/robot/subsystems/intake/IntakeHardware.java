@@ -1,11 +1,17 @@
 package org.frc6423.robot.subsystems.intake;
 
+import org.frc6423.monologue.Annotations.Log;
+
 import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * Reperesents generalized intake subsystem hardware
  */
 public abstract class IntakeHardware {
+    @Log public double pivotAngleRevs;
+
+    public abstract void updateSignals();
+
 
     /**
      * @return true if 1/3 limit switches are pressed
